@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Personal Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+    background: url('static/images/imageback.jpg') no-repeat center center;
+    background-size: center;
+    background-attachment: fixed;
+    overflow:hidden;
+    margin: 0;
+    padding: 0;
+        }
+
+        .chat-container {
+    width: 925px;
+    margin: 80px auto;
+    background: url('static/images/Untitled design (2).png') no-repeat center center;
+    background-size: contain;
+    box-shadow: 0 4px 8px rgba(253, 251, 251, 0.1);
+    border-radius: 8px;
+    overflow: hidden; /* Disable scrolling */
+    height: 550px; /* Set a fixed height */
+}
+.chat-body {
+    height: 100%; /* Use 100% of the container height */
+    overflow: hidden; /* Prevent internal scrolling */
+}
+
+        .chat-header {
+            background: #f99602;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .chat-body {
+            padding: 20px;
+            height: 400px;
+            overflow-y: auto;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+        }
+
+        .user-message {
+            text-align: right;
+            color: #444;
+        }
+
+        .bot-message {
+    background-color: rgba(255, 255, 255, 0.8); /* White background with slight transparency */
+    border-radius: 10px; /* Rounded corners */
+    padding: 10px; /* Add some inner spacing */
+    margin-bottom: 10px; /* Space between messages */
+    max-width: 80%; /* Limit width */
+    display: inline-block; /* Adjust to content width */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional: add a subtle shadow */
+}
+
+        .rating-buttons {
+            margin-top: 10px;
+            text-align: left;
+        }
+        .chat-container button[onclick="clearchat()"] {
+    background-color: #FF0000; /* Red color */
+    color: white;
+    position: absolute; /* Positioning */
+    left: 20px; 
+    bottom: 20px; 
+    border-radius: 5px;
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+        .chat-container button[onclick="clearchat()"]:hover {
+    background-color: #CC0000; /* Darker red on hover */
+}
+
+
+        .rating-buttons button {
+            background: #F99602;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .rating-buttons button:hover {
+            background: #afa84c;
+        }
+
+        .chat-footer {
+            display: flex;
+            border-top: 1px solid #ddd;
+            padding: 10px;
+            background: #f1f1f1;
+        }
+
+        .chat-footer input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .chat-footer button {
+            background: #F99602;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .chat-footer button:hover {
+            background: #afa84c;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            STARBOT
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-message bot-message">
+                Hello! How can I help you today?
+            </div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="userInput" placeholder="Type your message here...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+        <div style="text-align: center;">
+            <button onclick="clearchat()">Clear Conversations</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const chatBody = document.getElementById('chatBody');
+            const userInput = document.getElementById('userInput');
+
+            if (userInput.value.trim() !== "") {
+                // Add user's message to the chat
+                const userMessage = document.createElement('div');
+                userMessage.className = 'chat-message user-message';
+                userMessage.textContent = userInput.value;
+                chatBody.appendChild(userMessage);
+
+                // Send the message to the backend
+                const response = await fetch('/get_response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: userInput.value }),
+                });
+
+                const data = await response.json();
+                const botResponse = data.response;
+
+                // Add bot's response to the chat
+                const botMessage = document.createElement('div');
+                botMessage.className = 'chat-message bot-message';
+                botMessage.textContent = botResponse;
+                chatBody.appendChild(botMessage);
+
+                // Add rating buttons below the bot's response
+                addRatingButtons(botMessage);
+
+                // Scroll to the bottom of the chat
+                chatBody.scrollTop = chatBody.scrollHeight;
+
+                // Clear input
+                userInput.value = "";
+            }
+        }
+
+        function addRatingButtons(botMessage) {
+            const ratingButtons = document.createElement('div');
+            ratingButtons.className = 'rating-buttons';
+            ratingButtons.innerHTML = `
+                <button onclick="rateResponse(1, this.parentElement)">1</button>
+                <button onclick="rateResponse(2, this.parentElement)">2</button>
+                <button onclick="rateResponse(3, this.parentElement)">3</button>
+                <button onclick="rateResponse(4, this.parentElement)">4</button>
+                <button onclick="rateResponse(5, this.parentElement)">5</button>
+            `;
+            botMessage.appendChild(ratingButtons);
+        }
+
+        function rateResponse(rating, buttonContainer) {
+            // Get all buttons in this specific rating container
+            const buttons = buttonContainer.querySelectorAll('button');
+            
+            // Change colors of all buttons based on the rating
+            buttons.forEach((button, index) => {
+                if (index < rating) {
+                    button.style.backgroundColor = 'green';  // Active rating
+                    button.style.color = 'white';  // Text color
+                } else {
+                    button.style.backgroundColor = '#ccc';  // Inactive rating
+                    button.style.color = 'black';  // Text color
+                }
+            });
+
+            // Hide the entire rating buttons container
+            setTimeout(() => {
+                buttonContainer.style.display = 'none';
+            }, 500);  // Delay of 500 milliseconds before the buttons disappear
+        }
+
+        function clearchat() {
+            const chatBody = document.getElementById('chatBody');
+            chatBody.innerHTML = '';
+            const placeholderMessage = document.createElement('div');
+            placeholderMessage.textContent = "Chat cleared. Start a new conversation!";
+            placeholderMessage.style.textAlign = "center";
+            placeholderMessage.style.color = "#888";
+            chatBody.appendChild(placeholderMessage);
+        }
+
+        document.getElementById('userInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

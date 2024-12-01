@@ -1,0 +1,103 @@
+import pandas as pd
+import numpy as np
+import random
+
+# Set random seed for reproducibility
+np.random.seed(42)
+
+# Define lists for data generation
+makes = ['Toyota', 'Tata', 'Mahindra', 'Skoda']
+models = {
+    'Toyota': ['Corolla', 'Camry', 'RAV4', 'Innova', 'Fortuner'],
+    'Tata': ['Nexon', 'Harrier', 'Safari', 'Tiago', 'Altroz'],
+    'Mahindra': ['Scorpio', 'XUV500', 'Thar', 'Bolero', 'Marazzo'],
+    'Skoda': ['Rapid', 'Octavia', 'Kodiaq', 'Superb', 'Slavia']
+}
+variants = ['LE', 'SE', 'XLE', 'Adventure', 'Limited', 'TRD', 'GT', 'XLT', 'ST', 'Platinum']
+model_years = [2021, 2022, 2023, 2024]
+body_types = ['Sedan', 'SUV', 'Truck', 'Coupe', 'MPV']
+vehicle_types = ['Passenger']
+engine_types = ['Petrol', 'Diesel', 'Hybrid']
+fuel_types = ['Gasoline', 'Hybrid', 'Electric']
+dealers = ['AutoWorld Inc.', 'Prime Motors', 'DriveHub']
+locations = ['New York, NY', 'Los Angeles, CA', 'Chicago, IL']
+used_status = ['Used', 'Unused']
+price_ranges = ['15,000 - 17,000', '18,000 - 20,000', '25,000 - 30,000', '30,000 - 33,000', '35,000 - 40,000']
+
+# Function to generate realistic car data
+def generate_car_data(num_rows):
+    data = []
+    
+    for _ in range(num_rows):
+        # Randomly select make and model
+        make = random.choice(makes)
+        model = random.choice(models[make])
+        
+        # Generate variant
+        car_variant = random.choice(variants)
+        full_variant = f"{model} {car_variant}"
+        
+        # Generate other specifications with some logic
+        car_data = {
+            'Variant_ID': _ + 1,
+            'Make': make,
+            'Model': model,
+            'Variants': full_variant,
+            'Model_Year': random.choice(model_years),
+            'Body_Type': random.choice(body_types),
+            'Vehicle_Type': random.choice(vehicle_types),
+            'Engine_Type': random.choice(engine_types),
+            'Transmission': random.choice(['Manual', 'Automatic', 'CVT']),
+            'Engine_Displacement_cc': round(np.random.uniform(1500, 3000), 2),
+            'Engine_Power_HP': round(np.random.uniform(100, 300), 2),
+            'Torque_Nm': round(np.random.uniform(150, 500), 2),
+            'Fuel_Type': random.choice(fuel_types),
+            'Fuel_Tank_Capacity_L': round(np.random.uniform(40, 80), 2),
+            'Battery_Capacity_kWh': round(np.random.uniform(0, 2.5), 2),
+            'Mileage_km_l': round(np.random.uniform(10, 25), 2),
+            'Drive_Type': random.choice(['FWD', 'RWD', 'AWD', '4WD']),
+            'Wheelbase_mm': random.randint(2500, 3000),
+            'Length_mm': random.randint(4000, 5000),
+            'Width_mm': random.randint(1700, 2000),
+            'Height_mm': random.randint(1400, 1900),
+            'Ground_Clearance_mm': random.randint(150, 250),
+            'Curb_Weight_kg': round(np.random.uniform(1200, 2500), 2),
+            'Gross_Vehicle_Weight_kg': round(np.random.uniform(1800, 3200), 2),
+            'Seating_Capacity': random.choice([4, 5, 6, 7]),
+            'Number_of_Doors': random.choice([4, 5]),
+            'Sunroof': random.choice([0, 1]),
+            'Infotainment_System': f"{random.randint(8, 12)}-inch Touchscreen",
+            'Air_Conditioning': random.choice(['Manual', 'Automatic', 'Dual Zone']),
+            'Navigation_System': random.choice([0, 1]),
+            'Safety_Features': ', '.join(random.sample(['ABS', 'EBD', 'Lane Assist', 'Blind Spot Monitoring'], 
+                                                      2)),            
+                                                    #   airbag shoud be common
+            'Interior_Trim': random.choice(['Fabric', 'Leather', 'Premium Leather']),
+            'Tire_Specifications': f"{'215' if random.random() < 0.5 else '225'}/{'55' if random.random() < 0.5 else '65'} R{random.choice([16, 17, 18])}",
+            'Emissions_Standard': 'BS6',
+            'Service_Interval': f"{random.randint(10000, 22000)} /day",
+                                                    #km/day should be updated
+            'Wireless_Charging': random.choice([0, 1]),
+            'USB_Ports': random.randint(1, 4),
+            'Bluetooth_Connectivity': random.choice([0, 1]),
+            'ADAS': random.choice([0, 1]),
+            'Car': f"{make} {model}"
+        }
+        
+        data.append(car_data)
+    
+    return pd.DataFrame(data)
+
+# Generate 100 rows of car data
+car_df = generate_car_data(250)
+
+# Save to CSV
+car_df.to_csv('car_variants_multiple_makes.csv', index=False)
+
+# Display first few rows
+print(car_df.head())
+print("\nDataset shape:", car_df.shape)
+
+
+import os
+print("Current working directory:", os.getcwd())
